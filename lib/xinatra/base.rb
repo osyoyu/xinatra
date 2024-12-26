@@ -10,8 +10,12 @@ module Xinatra
       end
     end
 
+    def initialize
+      @routes = @@routes
+    end
+
     def call(env)
-      if env['REQUEST_METHOD'] == 'GET' && handler = @@routes[env['PATH_INFO']]
+      if env['REQUEST_METHOD'] == 'GET' && handler = @routes[env['PATH_INFO']]
         retstr = handler.call
         [200, { 'Content-Type' => 'text/plain' }, [retstr]]
       else
