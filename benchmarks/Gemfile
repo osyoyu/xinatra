@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+gem 'xinatra', path: '..'
+
+gem 'benchmark-ips'
+
+gem 'roda'
+gem 'sinatra'
