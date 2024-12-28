@@ -1,21 +1,23 @@
 # frozen_string_literal: true
 
+require_relative 'linear_router'
+
 module Xinatra
   class Base
-    @@routes = {}
+    @@router = LinearRouter.new
 
     class << self
       def get(path, &block)
-        @@routes[path] = block
+        @@router.define("GET", path, block)
       end
     end
 
     def initialize
-      @routes = @@routes
+      @router = @@router
     end
 
     def call(env)
-      if env['REQUEST_METHOD'] == 'GET' && handler = @routes[env['PATH_INFO']]
+      if handler = @router.match(env['REQUEST_METHOD'], env['PATH_INFO'])
         retstr = handler.call
         [200, { 'Content-Type' => 'text/plain' }, [retstr]]
       else
