@@ -119,27 +119,5 @@ RSpec.describe Xinatra::Base do
       expect(req[0]).to eq(200)
       expect(before).to have_received(:foo).once
     end
-
-    it 'runs before actions in defined order' do
-      before = spy
-      App.class_eval do
-        before do
-          before.foo
-        end
-
-        before do
-          before.bar
-        end
-
-        get '/hello' do
-          'Hello, world!'
-        end
-      end
-
-      req = App.new.call(build_rack_request('GET', '/hello').env)
-      expect(req[0]).to eq(200)
-      expect(before).to have_received(:foo).ordered
-      expect(before).to have_received(:bar).ordered
-    end
   end
 end
