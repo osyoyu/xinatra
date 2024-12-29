@@ -11,6 +11,26 @@ module Xinatra
         @@router.define("GET", path, block)
       end
 
+      def post(path, &block)
+        @@router.define("POST", path, block)
+      end
+
+      def put(path, &block)
+        @@router.define("PUT", path, block)
+      end
+
+      def patch(path, &block)
+        @@router.define("PATCH", path, block)
+      end
+
+      def delete(path, &block)
+        @@router.define("DELETE", path, block)
+      end
+
+      def options(path, &block)
+        @@router.define("OPTIONS", path, block)
+      end
+
       # for testing
       def reset
         @@router = LinearRouter.new
