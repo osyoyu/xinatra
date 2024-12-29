@@ -5,8 +5,6 @@ require_relative 'linear_router'
 module Xinatra
   class Base
     @@router = LinearRouter.new
-    @@before_actions = []
-    @@after_actions = []
 
     class << self
       def get(path, &block)
@@ -34,41 +32,43 @@ module Xinatra
       end
 
       def before(&block)
-        name = "before_#{@@before_actions.size}"
-        define_method(name, &block)
-        @@before_actions << name
+        define_method(:__before, &block)
       end
 
       def after(&block)
-        name = "after_#{@@after_actions.size}"
-        define_method(name, &block)
-        @@after_actions << name
+        define_method(:__after, &block)
       end
 
       # for testing
       def reset
         @@router = LinearRouter.new
-        @@before_actions = []
-        @@after_actions = []
+        define_method(:__before, -> {})
+        define_method(:__after, -> {})
       end
     end
 
     def initialize
       @router = @@router
-      @before_actions = @@before_actions
-      @after_actions = @@after_actions
     end
 
     def call(env)
-      @before_actions.each { |action| self.send(action) }
+      __before
       if handler = @router.match(env['REQUEST_METHOD'], env['PATH_INFO'])
         retstr = handler.call
         ret = [200, { 'Content-Type' => 'text/plain' }, [retstr]]
       else
         ret = [404, { 'Content-Type' => 'text/plain' }, ['']]
       end
-      @after_actions.each { |action| self.send(action) }
+      __after
       ret
+    end
+
+    def __before
+      # no-op; could be overridden via `before` DSL
+    end
+
+    def __after
+      # no-op; could be overridden via `after` DSL
     end
   end
 end
