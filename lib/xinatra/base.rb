@@ -5,6 +5,7 @@ require_relative 'linear_router'
 module Xinatra
   class Base
     @@router = LinearRouter.new
+    @@before_actions = []
 
     class << self
       def get(path, &block)
@@ -31,17 +32,25 @@ module Xinatra
         @@router.define("OPTIONS", path, block)
       end
 
+      def before(&block)
+        @@before_actions << block
+      end
+
       # for testing
       def reset
         @@router = LinearRouter.new
+        @@before_actions = []
       end
     end
 
     def initialize
       @router = @@router
+      @before_actions = @@before_actions
     end
 
     def call(env)
+      @before_actions.each { |action| self.instance_eval(&action) }
+
       if handler = @router.match(env['REQUEST_METHOD'], env['PATH_INFO'])
         retstr = handler.call
         [200, { 'Content-Type' => 'text/plain' }, [retstr]]
