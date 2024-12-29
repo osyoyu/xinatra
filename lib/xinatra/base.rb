@@ -10,6 +10,11 @@ module Xinatra
       def get(path, &block)
         @@router.define("GET", path, block)
       end
+
+      # for testing
+      def reset
+        @@router = LinearRouter.new
+      end
     end
 
     def initialize
