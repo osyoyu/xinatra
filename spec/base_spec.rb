@@ -119,5 +119,23 @@ RSpec.describe Xinatra::Base do
       expect(req[0]).to eq(200)
       expect(before).to have_received(:foo).once
     end
+
+    context 'when an instance variable is set in a before action' do
+      it 'is available in the handler' do
+        App.class_eval do
+          before do
+            @foo = 'bar'
+          end
+
+          get '/hello' do
+            @foo
+          end
+        end
+
+        req = App.new.call(build_rack_request('GET', '/hello').env)
+        expect(req[0]).to eq(200)
+        expect(req[2]).to eq(['bar'])
+      end
+    end
   end
 end

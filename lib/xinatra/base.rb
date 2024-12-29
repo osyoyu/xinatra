@@ -8,27 +8,39 @@ module Xinatra
 
     class << self
       def get(path, &block)
-        @@router.define("GET", path, block)
+        method_name = build_ruby_method_name("GET", path)
+        define_method(method_name, &block)
+        @@router.define("GET", path, method_name)
       end
 
       def post(path, &block)
-        @@router.define("POST", path, block)
+        method_name = build_ruby_method_name("POST", path)
+        define_method(method_name, &block)
+        @@router.define("POST", path, method_name)
       end
 
       def put(path, &block)
-        @@router.define("PUT", path, block)
+        method_name = build_ruby_method_name("PUT", path)
+        define_method(method_name, &block)
+        @@router.define("PUT", path, method_name)
       end
 
       def patch(path, &block)
-        @@router.define("PATCH", path, block)
+        method_name = build_ruby_method_name("PATCH", path)
+        define_method(method_name, &block)
+        @@router.define("PATCH", path, method_name)
       end
 
       def delete(path, &block)
-        @@router.define("DELETE", path, block)
+        method_name = build_ruby_method_name("DELETE", path)
+        define_method(method_name, &block)
+        @@router.define("DELETE", path, method_name)
       end
 
       def options(path, &block)
-        @@router.define("OPTIONS", path, block)
+        method_name = build_ruby_method_name("OPTIONS", path)
+        define_method(method_name, &block)
+        @@router.define("OPTIONS", path, method_name)
       end
 
       def before(&block)
@@ -45,6 +57,12 @@ module Xinatra
         define_method(:__before, -> {})
         define_method(:__after, -> {})
       end
+
+      private
+
+      def build_ruby_method_name(http_method, path)
+        "__handle___#{http_method.downcase}___#{path.gsub('/', '__')}"
+      end
     end
 
     def initialize
@@ -53,8 +71,8 @@ module Xinatra
 
     def call(env)
       __before
-      if handler = @router.match(env['REQUEST_METHOD'], env['PATH_INFO'])
-        retstr = handler.call
+      if handler_method_name = @router.match(env['REQUEST_METHOD'], env['PATH_INFO'])
+        retstr = self.send(handler_method_name)
         ret = [200, { 'Content-Type' => 'text/plain' }, [retstr]]
       else
         ret = [404, { 'Content-Type' => 'text/plain' }, ['']]
