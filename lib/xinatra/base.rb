@@ -34,11 +34,15 @@ module Xinatra
       end
 
       def before(&block)
-        @@before_actions << block
+        name = "before_#{@@before_actions.size}"
+        define_method(name, &block)
+        @@before_actions << name
       end
 
       def after(&block)
-        @@after_actions << block
+        name = "after_#{@@after_actions.size}"
+        define_method(name, &block)
+        @@after_actions << name
       end
 
       # for testing
@@ -56,14 +60,14 @@ module Xinatra
     end
 
     def call(env)
-      @before_actions.each { |action| self.instance_eval(&action) }
+      @before_actions.each { |action| self.send(action) }
       if handler = @router.match(env['REQUEST_METHOD'], env['PATH_INFO'])
         retstr = handler.call
         ret = [200, { 'Content-Type' => 'text/plain' }, [retstr]]
       else
         ret = [404, { 'Content-Type' => 'text/plain' }, ['']]
       end
-      @after_actions.each { |action| self.instance_eval(&action) }
+      @after_actions.each { |action| self.send(action) }
       ret
     end
   end
