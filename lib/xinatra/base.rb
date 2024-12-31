@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'rack'
+
 require_relative 'linear_router'
 
 module Xinatra
@@ -70,6 +72,8 @@ module Xinatra
     end
 
     def call(env)
+      @request = ::Rack::Request.new(env)
+
       __before
       if handler_method_name = @router.match(env['REQUEST_METHOD'], env['PATH_INFO'])
         retstr = self.send(handler_method_name)
@@ -79,6 +83,10 @@ module Xinatra
       end
       __after
       ret
+    end
+
+    def request
+      @request
     end
 
     def __before
