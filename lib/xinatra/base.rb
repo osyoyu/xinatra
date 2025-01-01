@@ -7,6 +7,7 @@ require_relative 'linear_router'
 module Xinatra
   class Base
     @@router = LinearRouter.new
+    @@error_handler = nil
 
     class << self
       def get(path, &block)
@@ -65,6 +66,10 @@ module Xinatra
         # no-op
       end
 
+      def error(klass = nil, &block)
+        @@error_handler = block
+      end
+
       # for testing
       def reset
         @@router = LinearRouter.new
@@ -81,6 +86,9 @@ module Xinatra
 
     def initialize
       @router = @@router
+      @error_handler = @@error_handler
+      @error_handled = false
+      @error_ret = nil
     end
 
     def call(env)
@@ -91,9 +99,13 @@ module Xinatra
       if handler_method_name = @router.match(env['REQUEST_METHOD'], env['PATH_INFO'])
         retstr = self.send(handler_method_name)
 
-        ret = [@status || 200, { 'Content-Type' => 'text/plain' }, [retstr]]
+        if @error_ret
+          return [@status || 500, { 'Content-Type' => 'application/json' },  @error_ret]
+        else
+          ret = [@status || 200, { 'Content-Type' => 'application/json' }, [retstr]]
+        end
       else
-        ret = [@status || 404, { 'Content-Type' => 'text/plain' }, ['']]
+        ret = [@status || 404, { 'Content-Type' => 'application/json' }, ['']]
       end
       __after
       ret
@@ -105,6 +117,11 @@ module Xinatra
 
     def status(code)
       @status = code
+    end
+
+    def error
+      @error_ret = self.instance_eval(&@error_handler)
+      @error_handled = true
     end
 
     def __before
