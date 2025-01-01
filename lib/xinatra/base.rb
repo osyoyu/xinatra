@@ -53,15 +53,15 @@ module Xinatra
         define_method(:__after, &block)
       end
 
-      def set
+      def set(a = nil, b = nil, c = nil, d = nil)
         # no-op
       end
 
-      def enable
+      def enable(a = nil, b = nil, c = nil, d = nil)
         # no-op
       end
 
-      def disable
+      def disable(a = nil, b = nil, c = nil, d = nil)
         # no-op
       end
 
