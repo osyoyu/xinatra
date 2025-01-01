@@ -85,13 +85,15 @@ module Xinatra
 
     def call(env)
       @request = ::Rack::Request.new(env)
+      @status = nil
 
       __before
       if handler_method_name = @router.match(env['REQUEST_METHOD'], env['PATH_INFO'])
         retstr = self.send(handler_method_name)
-        ret = [200, { 'Content-Type' => 'text/plain' }, [retstr]]
+
+        ret = [@status || 200, { 'Content-Type' => 'text/plain' }, [retstr]]
       else
-        ret = [404, { 'Content-Type' => 'text/plain' }, ['']]
+        ret = [@status || 404, { 'Content-Type' => 'text/plain' }, ['']]
       end
       __after
       ret
@@ -99,6 +101,10 @@ module Xinatra
 
     def request
       @request
+    end
+
+    def status(code)
+      @status = code
     end
 
     def __before
