@@ -53,6 +53,18 @@ module Xinatra
         define_method(:__after, &block)
       end
 
+      def set
+        # no-op
+      end
+
+      def enable
+        # no-op
+      end
+
+      def disable
+        # no-op
+      end
+
       # for testing
       def reset
         @@router = LinearRouter.new
