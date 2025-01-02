@@ -2,7 +2,7 @@
 
 module Xinatra
   class LinearRouter
-    Route = Data.define(:method, :path, :handler)
+    Route = Struct.new(:route, :method, :path, :handler)
 
     def initialize
       @routes = []
